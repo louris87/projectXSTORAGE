@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudDrive - Your Secure Cloud Storage</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Cloudinary Upload Widget -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading CloudDrive...</p>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen">
+        <div class="login-container">
+            <div class="logo">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h1>CloudDrive</h1>
+                <p>Secure cloud storage for all your files</p>
+            </div>
+            
+            <div class="login-box">
+                <h2>Welcome Back</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="Email address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('loginPassword')"></i>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+                
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+                
+                <button class="btn-google" onclick="signInWithGoogle()">
+                    <i class="fab fa-google"></i> Sign in with Google
+                </button>
+                
+                <p class="signup-link">
+                    Don't have an account? 
+                    <a href="#" onclick="showSignup()">Sign up here</a>
+                </p>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure Storage</h3>
+                    <p>Military-grade encryption for your files</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Fast Upload</h3>
+                    <p>High-speed upload with Cloudinary CDN</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Anywhere Access</h3>
+                    <p>Access files from any device, anywhere</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Screen -->
+    <div id="signupScreen" class="screen">
+        <div class="login-container">
+            <button class="back-btn" onclick="showLogin()">
+                <i class="fas fa-arrow-left"></i> Back to Login
+            </button>
+            
+            <div class="logo">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <h1>Create Account</h1>
+            </div>
+            
+            <div class="login-box">
+                <h2>Join CloudDrive</h2>
+                <form id="signupForm">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="signupName" placeholder="Full name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="signupEmail" placeholder="Email address" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupPassword" placeholder="Password (min. 6 characters)" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('signupPassword')"></i>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="signupConfirm" placeholder="Confirm password" required>
+                    </div>
+                    
+                    <div class="terms">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h2>CloudDrive</h2>
+                </div>
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 id="userName">User Name</h3>
+                    <p id="userEmail">user@example.com</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#" class="active" onclick="showSection('dashboardHome')">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#" onclick="showSection('myFiles')">
+                    <i class="fas fa-folder"></i> My Files
+                </a>
+                <a href="#" onclick="showSection('photos')">
+                    <i class="fas fa-images"></i> Photos
+                </a>
+                <a href="#" onclick="showSection('videos')">
+                    <i class="fas fa-video"></i> Videos
+                </a>
+                <a href="#" onclick="showSection('documents')">
+                    <i class="fas fa-file-alt"></i> Documents
+                </a>
+                <a href="#" onclick="showSection('recent')">
+                    <i class="fas fa-history"></i> Recent
+                </a>
+                <a href="#" onclick="showSection('trash')">
+                    <i class="fas fa-trash"></i> Trash
+                </a>
+            </nav>
+            
+            <div class="storage-info">
+                <div class="storage-header">
+                    <h4>Storage</h4>
+                    <span id="storagePercent">0%</span>
+                </div>
+                <div class="storage-bar">
+                    <div class="storage-progress" id="storageProgress"></div>
+                </div>
+                <p id="storageText">0 GB of 25 GB used</p>
+            </div>
+            
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search files...">
+                    <button class="clear-search" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="btn-upload" onclick="openUploadWidget()">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload
+                    </button>
+                    <button class="btn-notification" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </button>
+                    <button class="btn-settings" onclick="showSection('settings')">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Notifications Panel -->
+            <div id="notificationsPanel" class="notifications-panel">
+                <div class="notifications-header">
+                    <h3>Notifications</h3>
+                    <button onclick="clearNotifications()">Clear All</button>
+                </div>
+                <div id="notificationsList" class="notifications-list">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Dashboard Home -->
+            <div id="dashboardHome" class="content-section active">
+                <div class="welcome-banner">
+                    <h1>Welcome back, <span id="greetingName">User</span>!</h1>
+                    <p>You have <span id="fileCount">0</span> files stored in your CloudDrive</p>
+                </div>
+                
+                <div class="quick-actions">
+                    <div class="action-card" onclick="openUploadWidget()">
+                        <div class="action-icon upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Upload Files</h3>
+                        <p>Add new files to your storage</p>
+                    </div>
+                    
+                    <div class="action-card" onclick="showSection('photos')">
+                        <div class="action-icon photos">
+                            <i class="fas fa-images"></i>
+                        </div>
+                        <h3>View Photos</h3>
+                        <p>Browse your image collection</p>
+                    </div>
+                    
+                    <div class="action-card" onclick="showSection('documents')">
+                        <div class="action-icon documents">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3>Documents</h3>
+                        <p>Access your documents</p>
+                    </div>
+                    
+                    <div class="action-card" onclick="showSection('recent')">
+                        <div class="action-icon recent">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h3>Recent Files</h3>
+                        <p>Recently accessed files</p>
+                    </div>
+                </div>
+                
+                <div class="recent-files">
+                    <div class="section-header">
+                        <h2>Recent Files</h2>
+                        <button class="btn-view-all" onclick="showSection('myFiles')">View All</button>
+                    </div>
+                    <div id="recentFilesList" class="files-grid">
+                        <!-- Files will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="storage-usage">
+                    <h2>Storage Overview</h2>
+                    <div class="storage-details">
+                        <div class="storage-item">
+                            <span class="storage-label">Photos</span>
+                            <div class="storage-bar-small">
+                                <div class="storage-fill" id="photosStorage" style="width: 0%"></div>
+                            </div>
+                            <span class="storage-size" id="photosSize">0 MB</span>
+                        </div>
+                        <div class="storage-item">
+                            <span class="storage-label">Videos</span>
+                            <div class="storage-bar-small">
+                                <div class="storage-fill" id="videosStorage" style="width: 0%"></div>
+                            </div>
+                            <span class="storage-size" id="videosSize">0 MB</span>
+                        </div>
+                        <div class="storage-item">
+                            <span class="storage-label">Documents</span>
+                            <div class="storage-bar-small">
+                                <div class="storage-fill" id="docsStorage" style="width: 0%"></div>
+                            </div>
+                            <span class="storage-size" id="docsSize">0 MB</span>
+                        </div>
+                        <div class="storage-item">
+                            <span class="storage-label">Other</span>
+                            <div class="storage-bar-small">
+                                <div class="storage-fill" id="otherStorage" style="width: 0%"></div>
+                            </div>
+                            <span class="storage-size" id="otherSize">0 MB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Files Section -->
+            <div id="myFiles" class="content-section">
+                <div class="section-header">
+                    <h2>My Files</h2>
+                    <div class="header-controls">
+                        <div class="view-options">
+                            <button class="view-btn active" onclick="changeView('grid')">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" onclick="changeView('list')">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <select class="sort-select" id="sortSelect" onchange="sortFiles()">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="name-asc">Name A-Z</option>
+                            <option value="name-desc">Name Z-A</option>
+                            <option value="size-asc">Smallest First</option>
+                            <option value="size-desc">Largest First</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="allFilesList" class="files-grid">
+                    <!-- All files will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Photos Section -->
+            <div id="photos" class="content-section">
+                <div class="section-header">
+                    <h2>Photos</h2>
+                    <button class="btn-upload" onclick="openUploadWidget()">
+                        <i class="fas fa-plus"></i> Add Photos
+                    </button>
+                </div>
+                <div id="photosGrid" class="photos-grid">
+                    <!-- Photos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Videos Section -->
+            <div id="videos" class="content-section">
+                <div class="section-header">
+                    <h2>Videos</h2>
+                    <button class="btn-upload" onclick="openUploadWidget()">
+                        <i class="fas fa-plus"></i> Add Videos
+                    </button>
+                </div>
+                <div id="videosGrid" class="videos-grid">
+                    <!-- Videos will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div id="documents" class="content-section">
+                <div class="section-header">
+                    <h2>Documents</h2>
+                    <button class="btn-upload" onclick="openUploadWidget()">
+                        <i class="fas fa-plus"></i> Add Documents
+                    </button>
+                </div>
+                <div id="documentsGrid" class="files-grid">
+                    <!-- Documents will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Recent Section -->
+            <div id="recent" class="content-section">
+                <div class="section-header">
+                    <h2>Recently Accessed</h2>
+                    <button class="btn-refresh" onclick="loadUserFiles()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="recentFilesFull" class="files-grid">
+                    <!-- Recent files will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Trash Section -->
+            <div id="trash" class="content-section">
+                <div class="section-header">
+                    <h2>Trash</h2>
+                    <div class="trash-actions">
+                        <button class="btn-secondary" onclick="restoreAllTrash()">
+                            <i class="fas fa-undo"></i> Restore All
+                        </button>
+                        <button class="btn-danger" onclick="emptyTrash()">
+                            <i class="fas fa-trash"></i> Empty Trash
+                        </button>
+                    </div>
+                </div>
+                <div id="trashList" class="files-grid">
+                    <!-- Trashed files will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="content-section">
+                <div class="settings-header">
+                    <h2><i class="fas fa-cog"></i> Account Settings</h2>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-user-cog"></i> Profile Settings</h3>
+                        <div class="setting-item">
+                            <label>Display Name</label>
+                            <input type="text" id="displayName" value="John Doe">
+                            <button class="btn-save" onclick="updateProfile()">Save</button>
+                        </div>
+                        <div class="setting-item">
+                            <label>Email</label>
+                            <input type="email" id="userEmailInput" value="john@example.com" disabled>
+                        </div>
+                        <div class="setting-item">
+                            <label>Account Created</label>
+                            <span id="accountCreated">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-bell"></i> Notifications</h3>
+                        <div class="setting-item toggle">
+                            <label>Email notifications</label>
+                            <label class="switch">
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle">
+                            <label>Upload notifications</label>
+                            <label class="switch">
+                                <input type="checkbox" id="uploadNotifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item toggle">
+                            <label>Storage alerts</label>
+                            <label class="switch">
+                                <input type="checkbox" id="storageAlerts" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-palette"></i> Theme</h3>
+                        <div class="theme-options">
+                            <button class="theme-btn active" data-theme="light">
+                                <i class="fas fa-sun"></i> Light
+                            </button>
+                            <button class="theme-btn" data-theme="dark">
+                                <i class="fas fa-moon"></i> Dark
+                            </button>
+                            <button class="theme-btn" data-theme="auto">
+                                <i class="fas fa-adjust"></i> Auto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-download"></i> Backup</h3>
+                        <button class="btn-secondary" onclick="exportData()">
+                            <i class="fas fa-file-export"></i> Export Data
+                        </button>
+                        <button class="btn-secondary" onclick="backupFiles()">
+                            <i class="fas fa-database"></i> Create Backup
+                        </button>
+                    </div>
+                    
+                    <div class="settings-card danger">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                        <button class="btn-danger" onclick="clearAllFiles()">
+                            <i class="fas fa-trash"></i> Delete All Files
+                        </button>
+                        <button class="btn-danger" onclick="deleteAccount()">
+                            <i class="fas fa-user-slash"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Progress Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Uploading Files</h3>
+                <button class="close-modal" onclick="closeUploadModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="uploadProgressContainer">
+                    <!-- Upload progress bars will be added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeUploadModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content preview-content">
+            <div class="modal-header">
+                <h3 id="previewFileName">File Preview</h3>
+                <button class="close-modal" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body preview-body">
+                <div id="previewContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="file-info">
+                    <div class="info-item">
+                        <span class="info-label">Size:</span>
+                        <span id="previewFileSize">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Type:</span>
+                        <span id="previewFileType">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Uploaded:</span>
+                        <span id="previewUploadDate">-</span>
+                    </div>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn-primary" onclick="downloadCurrentFile()">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn-secondary" onclick="shareCurrentFile()">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button class="btn-danger" onclick="deleteCurrentFile()">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
